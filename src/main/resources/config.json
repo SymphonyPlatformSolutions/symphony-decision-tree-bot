@@ -1,0 +1,18 @@
+{
+    "sessionAuthHost": "psdev.symphony.com",
+    "sessionAuthPort": 443,
+    "keyAuthHost": "psdev.symphony.com",
+    "keyAuthPort": 443,
+    "podHost": "psdev.symphony.com",
+    "podPort": 443,
+    "agentHost": "psdev.symphony.com",
+    "agentPort": 443,
+    "truststorePath": "internal_truststore",
+    "truststorePassword": "changeit",
+    "botUsername": "decision-tree-bot",
+    "botEmailAddress": "decision-tree-bot@bots.symphony.com",
+    "botPrivateKeyPath": "rsa/",
+    "botPrivateKeyName": "rsa-private-decision-tree-bot.pem",
+    "dataFilePath": "data.csv",
+    "complianceRoomName": "Admin Room"
+}

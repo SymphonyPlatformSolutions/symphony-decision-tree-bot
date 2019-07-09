@@ -1,0 +1,7 @@
+Where are you going?,When is it?,Are you doing this?,Result
+Somewhere,Today,No,Maybe                
+Somewhere,Today,Yes,Answer A             
+Somewhere,Tomorrow,Yes,Absolutely           
+Somewhere,Tomorrow,No,Subject to approval  
+Nowhere,Today,N/A,Not permitted        
+Nowhere,Tomorrow,N/A,Here are some caveats
