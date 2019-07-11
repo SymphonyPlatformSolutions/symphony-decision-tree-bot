@@ -3,16 +3,22 @@ package com.symphony.platformsolutions.decisiontree;
 import authentication.SymBotRSAAuth;
 import clients.SymBotClient;
 import com.symphony.platformsolutions.decisiontree.config.DecisionTreeBotConfig;
+import com.symphony.platformsolutions.decisiontree.entity.Scenario;
 import com.symphony.platformsolutions.decisiontree.entity.ScenarioDatabase;
 import com.symphony.platformsolutions.decisiontree.listeners.IMListenerImpl;
 import com.symphony.platformsolutions.decisiontree.listeners.RoomListenerImpl;
-import com.symphony.platformsolutions.decisiontree.entity.Scenario;
 import com.symphony.platformsolutions.decisiontree.service.ScenarioService;
+import com.symphony.platformsolutions.decisiontree.web.WebService;
 import configuration.SymConfigLoader;
 import model.OutboundMessage;
 import model.RoomInfo;
 import model.RoomSearchQuery;
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.ws.rs.core.NoContentException;
@@ -37,6 +43,7 @@ public class DecisionTreeBot {
 
     private DecisionTreeBot() {
         BasicConfigurator.configure();
+        org.apache.log4j.Logger.getRootLogger().setLevel(Level.INFO);
 
         try {
             config = SymConfigLoader.loadConfig("config.json", DecisionTreeBotConfig.class);
@@ -62,12 +69,36 @@ public class DecisionTreeBot {
 
             botClient.getPresenceClient().setPresence("Available");
             LOG.info("Bot is ready");
+
+            startServer();
         } catch (NoContentException e) {
             LOG.error("Compliance room [{}] does not exist", config.getAdminRoomName());
             System.exit(1);
         } catch (IOException | URISyntaxException e) {
             LOG.error("Data file does not exist or insufficient permissions: {}", config.getDataFilePath());
             System.exit(1);
+        }
+    }
+
+    private void startServer() {
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context.setContextPath("/");
+
+        Server jettyServer = new Server(8080);
+        jettyServer.setHandler(context);
+
+        ServletHolder jerseyServlet = context.addServlet(ServletContainer.class, "/*");
+        jerseyServlet.setInitOrder(0);
+
+        jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", WebService.class.getCanonicalName());
+
+        try {
+            jettyServer.start();
+            jettyServer.join();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            jettyServer.destroy();
         }
     }
 
