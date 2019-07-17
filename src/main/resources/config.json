@@ -14,5 +14,5 @@
     "botPrivateKeyPath": "rsa/",
     "botPrivateKeyName": "rsa-private-decision-tree-bot.pem",
     "dataFilePath": "data.csv",
-    "complianceRoomName": "Admin Room"
+    "adminRoomName": "Decision Tree Bot Admin Room"
 }
