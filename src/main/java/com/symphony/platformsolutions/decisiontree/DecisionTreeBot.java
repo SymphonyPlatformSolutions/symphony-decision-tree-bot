@@ -2,28 +2,25 @@ package com.symphony.platformsolutions.decisiontree;
 
 import authentication.SymBotRSAAuth;
 import clients.SymBotClient;
+import com.sun.net.httpserver.HttpServer;
 import com.symphony.platformsolutions.decisiontree.config.DecisionTreeBotConfig;
 import com.symphony.platformsolutions.decisiontree.entity.Scenario;
 import com.symphony.platformsolutions.decisiontree.entity.ScenarioDatabase;
 import com.symphony.platformsolutions.decisiontree.listeners.IMListenerImpl;
 import com.symphony.platformsolutions.decisiontree.listeners.RoomListenerImpl;
 import com.symphony.platformsolutions.decisiontree.service.ScenarioService;
-import com.symphony.platformsolutions.decisiontree.web.WebService;
 import configuration.SymConfigLoader;
 import model.OutboundMessage;
 import model.RoomInfo;
 import model.RoomSearchQuery;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.ws.rs.core.NoContentException;
 import java.io.File;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +67,7 @@ public class DecisionTreeBot {
             botClient.getPresenceClient().setPresence("Available");
             LOG.info("Bot is ready");
 
-            startServer();
+            startHealthCheckServer();
         } catch (NoContentException e) {
             LOG.error("Compliance room [{}] does not exist", config.getAdminRoomName());
             System.exit(1);
@@ -80,25 +77,20 @@ public class DecisionTreeBot {
         }
     }
 
-    private void startServer() {
-        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-        context.setContextPath("/");
-
-        Server jettyServer = new Server(8080);
-        jettyServer.setHandler(context);
-
-        ServletHolder jerseyServlet = context.addServlet(ServletContainer.class, "/*");
-        jerseyServlet.setInitOrder(0);
-
-        jerseyServlet.setInitParameter("jersey.config.server.provider.classnames", WebService.class.getCanonicalName());
-
+    private void startHealthCheckServer() {
         try {
-            jettyServer.start();
-            jettyServer.join();
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            jettyServer.destroy();
+            HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
+            server.createContext("/healthz", exchange -> {
+                String response = "{ \"status\": \"UP\" }";
+                exchange.sendResponseHeaders(200, response.length());
+                exchange.getResponseBody().write(response.getBytes());
+                exchange.getResponseBody().close();
+            });
+            server.setExecutor(null);
+            server.start();
+            LOG.info("Health check endpoint is up");
+        } catch (IOException e) {
+            LOG.error("Unable to start health check", e);
         }
     }
 
