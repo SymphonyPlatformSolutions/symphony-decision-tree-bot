@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class IMListenerImpl implements IMListener {
     private static final Logger LOG = LoggerFactory.getLogger(IMListenerImpl.class);
@@ -24,7 +25,11 @@ public class IMListenerImpl implements IMListener {
         }
     }
 
-    public void onIMCreated(Stream stream) {}
+    public void onIMCreated(Stream stream) {
+        if (DecisionTreeBot.getWelcomeMessage() != null) {
+            DecisionTreeBot.sendMessage(stream.getStreamId(), DecisionTreeBot.getWelcomeMessage());
+        }
+    }
 
     private boolean processMessage(long userId, String msg, String streamId) {
         if (msg.equalsIgnoreCase("/reset")) {
@@ -39,9 +44,10 @@ public class IMListenerImpl implements IMListener {
             return false;
         }
 
-        if (DecisionTreeBot.getState(userId).stream()
-            .anyMatch(scenario -> scenario.getQuestion().equals("Custom Enquiry") && scenario.getAnswer() == null)
-        ) {
+        boolean isCustomEnquiry = DecisionTreeBot.getState(userId).stream()
+            .anyMatch(scenario -> scenario.getQuestion().equals("Custom Enquiry") && scenario.getAnswer() == null);
+
+        if (isCustomEnquiry) {
             DecisionTreeBot.getState(userId).stream()
                 .filter(scenario -> scenario.getQuestion().equals("Custom Enquiry"))
                 .findFirst().orElse(new Scenario()).setAnswer(msg);
@@ -62,33 +68,23 @@ public class IMListenerImpl implements IMListener {
         List<String> previousOptions = getOptions(stage, DecisionTreeBot.getState(userId));
         String option;
 
-        if (previousOptions.size() < 10) {
-            if (!msg.matches("^\\d+$")) {
-                DecisionTreeBot.sendMessage(streamId, "Invalid choice");
-                return false;
-            }
-            int choice = Integer.parseInt(msg) - 1;
-            if (choice > previousOptions.size() - 1) {
-                DecisionTreeBot.sendMessage(streamId, "Invalid choice");
-                return false;
-            }
-            option = previousOptions.get(choice);
-        } else {
-            if (msg.equalsIgnoreCase("/list")) {
-                DecisionTreeBot.sendMessage(streamId, "Options: " + String.join(", ", previousOptions));
-                return false;
-            }
-            Optional<String> choice = previousOptions.stream()
+        if (!msg.matches("^\\d+$")) {
+            // String input
+            option = previousOptions.stream()
                 .filter(o -> o.replaceAll(" ", "")
                     .equalsIgnoreCase(msg.replaceAll(" ", ""))
-                ).findFirst();
-            if (!choice.isPresent()) {
-                DecisionTreeBot.sendMessage(streamId, "Invalid choice");
-                return false;
-
-            } else {
-                option = choice.get();
+                ).findFirst().orElse(null);
+        } else {
+            // Numeric input
+            try {
+                option = previousOptions.get(Integer.parseInt(msg) - 1);
+            } catch (IndexOutOfBoundsException e) {
+                option = null;
             }
+        }
+        if (option == null) {
+            DecisionTreeBot.sendMessage(streamId, DecisionTreeBot.getInvalidChoiceMessage());
+            return false;
         }
 
         String previousHeader = DecisionTreeBot.getScenarioDb().getHeaders()[stage];
@@ -115,44 +111,42 @@ public class IMListenerImpl implements IMListener {
         }
 
         List<String> optionsToReturn = options;
-        if (stage == DecisionTreeBot.getScenarioDb().getHeaders().length - 1) {
+        boolean isResult = (stage == DecisionTreeBot.getScenarioDb().getHeaders().length - 1);
+
+        if (isResult) {
             optionsToReturn = Collections.singletonList(options.get(0));
             DecisionTreeBot.resetState(userId);
-            sendOptionsMessage(streamId, DecisionTreeBot.getScenarioDb().getHeaders()[stage], optionsToReturn, true);
-        } else {
-            sendOptionsMessage(streamId, DecisionTreeBot.getScenarioDb().getHeaders()[stage], optionsToReturn, false);
         }
+        sendOptionsMessage(streamId, DecisionTreeBot.getScenarioDb().getHeaders()[stage], optionsToReturn, isResult);
         return false;
     }
 
     private void sendOptionsMessage(String streamId, String header, List<String> options, boolean isResult) {
-        StringBuilder replyML = new StringBuilder();
-
         if (!isResult) {
-            int optionIndex = 1;
-            replyML.append(header);
+            String optionsML = IntStream.range(0, options.size())
+                .mapToObj(i -> String.format("<li>%d: %s</li>", i+1, options.get(i)))
+                .collect(Collectors.joining(""));
 
-            if (options.size() < 10) {
-                replyML.append("<ul>");
-                for (String option : options) {
-                    replyML.append(String.format("<li>%d: %s</li>", optionIndex++, option));
-                }
-                replyML.append("</ul>");
-            } else {
-                replyML.append(String.format(" (%d options available. reply with /list to get all options.)",
-                    options.size()));
-            }
+            DecisionTreeBot.sendMessage(streamId, String.format("%s<ul>%s</ul>", header, optionsML));
         } else {
-            String colour;
-            switch (options.get(0)) {
-                case "Permitted": colour = "green"; break;
-                case "Not permitted": colour = "red"; break;
-                default: colour = "yellow";
+            String result = options.get(0);
+            String colour = null;
+            if (result.startsWith("Permitted, with conditions")) {
+                colour = "yellow";
+            } else if (result.startsWith("Permitted")) {
+                colour = "green";
+            } else if (result.startsWith("Not permitted")) {
+                colour = "red";
             }
-            replyML.append(String.format("%s: <span class=\"tempo-bg-color--%s\">%s</span>",
-                header, colour, options.get(0)));
+            String resultML = (colour == null) ? result :
+                String.format("<span class=\"tempo-bg-color--%s\">%s</span>", colour, result);
+
+            DecisionTreeBot.sendMessage(streamId, String.format("%s: %s", header, resultML));
+
+            if (DecisionTreeBot.getCompletionMessage() != null) {
+                DecisionTreeBot.sendMessage(streamId, DecisionTreeBot.getCompletionMessage());
+            }
         }
-        DecisionTreeBot.sendMessage(streamId, replyML.toString());
     }
 
     private List<String> getOptions(int stage, List<Scenario> previousOptions) {

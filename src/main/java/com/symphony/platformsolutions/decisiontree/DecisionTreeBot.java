@@ -21,7 +21,6 @@ import javax.ws.rs.core.NoContentException;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,11 +66,13 @@ public class DecisionTreeBot {
             botClient.getPresenceClient().setPresence("Available");
             LOG.info("Bot is ready");
 
-            startHealthCheckServer();
+            if (config.isHealthCheckEnabled()) {
+                startHealthCheckServer();
+            }
         } catch (NoContentException e) {
             LOG.error("Compliance room [{}] does not exist", config.getAdminRoomName());
             System.exit(1);
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             LOG.error("Data file does not exist or insufficient permissions: {}", config.getDataFilePath());
             System.exit(1);
         }
@@ -94,7 +95,34 @@ public class DecisionTreeBot {
         }
     }
 
-    public static void reloadScenarioDb() throws IOException, URISyntaxException {
+    /* Config */
+
+    public static String getDataFilePath() {
+        return config.getDataFilePath();
+    }
+
+    public static String getAdminRoomId() {
+        return adminRoomId;
+    }
+
+    public static String getWelcomeMessage() {
+        return config.getWelcomeMessage();
+    }
+
+    public static String getInvalidChoiceMessage() {
+        if (config.getInvalidChoiceMessage() == null) {
+            return "Invalid Choice";
+        }
+        return config.getInvalidChoiceMessage();
+    }
+
+    public static String getCompletionMessage() {
+        return config.getCompletionMessage();
+    }
+
+    /* Scenario Database */
+
+    public static void reloadScenarioDb() throws IOException {
         List<String[]> data = ScenarioService.readCsv();
         scenarioDatabase = ScenarioService.loadScenarioDatabase(data);
 
@@ -102,13 +130,11 @@ public class DecisionTreeBot {
             scenarioDatabase.getScenarioPaths().size(), getDataFilePath());
     }
 
-    public static String getDataFilePath() {
-        return config.getDataFilePath();
-    }
-
     public static ScenarioDatabase getScenarioDb() {
         return scenarioDatabase;
     }
+
+    /* State Management */
 
     public static Map<Long, List<Scenario>> getState() {
         return state;
@@ -130,12 +156,13 @@ public class DecisionTreeBot {
         state.put(userId, options);
     }
 
-    public static String getAdminRoomId() {
-        return adminRoomId;
-    }
+    /* Symphony APIs */
 
     public static void sendMessage(String streamId, String message) {
-        botClient.getMessagesClient().sendMessage(streamId, new OutboundMessage(message));
+        String formattedMsg = message
+            .replaceAll("<br>", "<br />")
+            .replaceAll("\n", "<br />");
+        botClient.getMessagesClient().sendMessage(streamId, new OutboundMessage(formattedMsg));
     }
 
     public static void sendMessage(String streamId, String message, File[] attachments) {

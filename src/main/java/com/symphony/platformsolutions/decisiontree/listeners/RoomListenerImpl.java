@@ -116,7 +116,7 @@ public class RoomListenerImpl implements RoomListener {
             try {
                 ScenarioService.saveDataFile(existingDataBytes);
                 DecisionTreeBot.reloadScenarioDb();
-            } catch (IOException | URISyntaxException e2) {
+            } catch (IOException e2) {
                 LOG.error("", e2);
             }
         }
