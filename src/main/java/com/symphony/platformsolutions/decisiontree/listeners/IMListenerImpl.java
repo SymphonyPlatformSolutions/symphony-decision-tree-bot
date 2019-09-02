@@ -14,6 +14,7 @@ import java.util.stream.IntStream;
 
 public class IMListenerImpl implements IMListener {
     private static final Logger LOG = LoggerFactory.getLogger(IMListenerImpl.class);
+    public static final String COLOR_TEMPLATE = "<span class=\"tempo-bg-color--%s\">~$0</span>";
 
     public void onIMMessage(InboundMessage inMsg) {
         long userId = inMsg.getUser().getUserId();
@@ -130,16 +131,13 @@ public class IMListenerImpl implements IMListener {
             DecisionTreeBot.sendMessage(streamId, String.format("%s<ul>%s</ul>", header, optionsML));
         } else {
             String result = options.get(0);
-            String colour = null;
-            if (result.startsWith("Permitted, with conditions")) {
-                colour = "yellow";
-            } else if (result.startsWith("Permitted")) {
-                colour = "green";
-            } else if (result.startsWith("Not permitted")) {
-                colour = "red";
-            }
-            String resultML = (colour == null) ? result :
-                String.format("<span class=\"tempo-bg-color--%s\">%s</span>", colour, result);
+
+            String resultML = result
+                .replaceAll("([Pp]ermitted, [Ww]ith [Cc]onditions)", getTemplate("yellow"))
+                .replaceAll("([Nn]ot [Pp]ermitted)", getTemplate("red"))
+                .replaceAll("(?<!~([Nn]ot )?)([Pp]ermitted)", getTemplate("green"))
+                .replaceAll("~([Pp]ermitted)", "$1")
+                .replaceAll("~([Nn]ot)", "$1");
 
             DecisionTreeBot.sendMessage(streamId, String.format("%s: %s", header, resultML));
 
@@ -147,6 +145,11 @@ public class IMListenerImpl implements IMListener {
                 DecisionTreeBot.sendMessage(streamId, DecisionTreeBot.getCompletionMessage());
             }
         }
+    }
+
+    private String getTemplate(String color) {
+        String template = color.equals("green") ? COLOR_TEMPLATE.replace("~", "") : COLOR_TEMPLATE;
+        return String.format(template, color);
     }
 
     private List<String> getOptions(int stage, List<Scenario> previousOptions) {
