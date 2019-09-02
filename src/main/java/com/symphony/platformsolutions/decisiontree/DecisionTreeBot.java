@@ -105,6 +105,10 @@ public class DecisionTreeBot {
         return adminRoomId;
     }
 
+    public static boolean isEnquiryEnabled() {
+        return config.isEnquiryEnabled();
+    }
+
     public static String getWelcomeMessage() {
         return config.getWelcomeMessage();
     }

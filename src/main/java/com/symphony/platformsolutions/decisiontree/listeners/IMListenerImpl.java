@@ -175,7 +175,7 @@ public class IMListenerImpl implements IMListener {
                 .collect(Collectors.toCollection(LinkedList::new));
             options.add("Back to Main");
         }
-        if (DecisionTreeBot.getAdminRoomId() != null) {
+        if (DecisionTreeBot.getAdminRoomId() != null && DecisionTreeBot.isEnquiryEnabled()) {
             options.add("My enquiry is not listed");
         }
         return options;

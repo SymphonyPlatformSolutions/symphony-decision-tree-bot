@@ -8,6 +8,7 @@ public class DecisionTreeBotConfig extends SymConfig {
     private String dataFilePath;
     private String adminRoomName;
     private boolean healthCheckEnabled;
+    private boolean enquiryEnabled;
     private String welcomeMessage;
     private String invalidChoiceMessage;
     private String completionMessage;
@@ -34,6 +35,14 @@ public class DecisionTreeBotConfig extends SymConfig {
 
     public void setHealthCheckEnabled(boolean healthCheckEnabled) {
         this.healthCheckEnabled = healthCheckEnabled;
+    }
+
+    public boolean isEnquiryEnabled() {
+        return enquiryEnabled;
+    }
+
+    public void setEnquiryEnabled(boolean enquiryEnabled) {
+        this.enquiryEnabled = enquiryEnabled;
     }
 
     public String getWelcomeMessage() {
