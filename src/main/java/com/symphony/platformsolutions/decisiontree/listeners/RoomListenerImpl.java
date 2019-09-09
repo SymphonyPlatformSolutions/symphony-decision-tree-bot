@@ -69,7 +69,7 @@ public class RoomListenerImpl implements RoomListener {
             .replaceFirst("/reply @", "")
             .replaceFirst(mentionDisplayName, "").trim();
         String mention = String.format("<mention uid=\"%d\" /> ", mentions.get(0));
-        DecisionTreeBot.sendMessage(userImStreamId, mention + replyText);
+        DecisionTreeBot.sendMessage(userImStreamId, mention + DecisionTreeBot.cleanMessage(replyText));
     }
 
     private void processDownload(String streamId, boolean isAdHoc) {

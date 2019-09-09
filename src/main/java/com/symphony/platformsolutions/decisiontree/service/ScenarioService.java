@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 public class ScenarioService {
     private static final Logger LOG = LoggerFactory.getLogger(ScenarioService.class);
-    
+
     public static List<String[]> readCsv() throws IOException {
         String path = DecisionTreeBot.getDataFilePath();
 
@@ -56,7 +56,7 @@ public class ScenarioService {
                 .map(entry -> {
                     ScenarioPath scenarioPath = new ScenarioPath();
                     for (int i=0; i<entry.length; i++) {
-                        scenarioPath.addScenario(new Scenario(headers[i], entry[i].replaceAll("\n", "<br/>")));
+                        scenarioPath.addScenario(new Scenario(headers[i], entry[i]));
                     }
                     return scenarioPath;
                 })

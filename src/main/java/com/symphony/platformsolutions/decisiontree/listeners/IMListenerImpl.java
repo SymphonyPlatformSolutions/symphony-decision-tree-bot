@@ -123,15 +123,16 @@ public class IMListenerImpl implements IMListener {
     }
 
     private void sendOptionsMessage(String streamId, String header, List<String> options, boolean isResult) {
+        String cleanHeader = DecisionTreeBot.cleanMessage(header);
+
         if (!isResult) {
             String optionsML = IntStream.range(0, options.size())
-                .mapToObj(i -> String.format("<li>%d: %s</li>", i+1, options.get(i)))
+                .mapToObj(i -> String.format("<li>%d: %s</li>", i+1, DecisionTreeBot.cleanMessage(options.get(i))))
                 .collect(Collectors.joining(""));
 
-            DecisionTreeBot.sendMessage(streamId, String.format("%s<ul>%s</ul>", header, optionsML));
+            DecisionTreeBot.sendMessage(streamId, String.format("%s<ul>%s</ul>", cleanHeader, optionsML));
         } else {
-            String result = options.get(0);
-
+            String result = DecisionTreeBot.cleanMessage(options.get(0));
             String resultML = result
                 .replaceAll("([Pp]ermitted, [Ww]ith [Cc]onditions)", getTemplate("yellow"))
                 .replaceAll("([Nn]ot [Pp]ermitted)", getTemplate("red"))
@@ -139,7 +140,7 @@ public class IMListenerImpl implements IMListener {
                 .replaceAll("~([Pp]ermitted)", "$1")
                 .replaceAll("~([Nn]ot)", "$1");
 
-            DecisionTreeBot.sendMessage(streamId, String.format("%s: %s", header, resultML));
+            DecisionTreeBot.sendMessage(streamId, String.format("%s: %s", cleanHeader, resultML));
 
             if (DecisionTreeBot.getCompletionMessage() != null) {
                 DecisionTreeBot.sendMessage(streamId, DecisionTreeBot.getCompletionMessage());

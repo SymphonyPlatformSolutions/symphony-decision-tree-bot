@@ -10,6 +10,7 @@ import com.symphony.platformsolutions.decisiontree.listeners.IMListenerImpl;
 import com.symphony.platformsolutions.decisiontree.listeners.RoomListenerImpl;
 import com.symphony.platformsolutions.decisiontree.service.ScenarioService;
 import configuration.SymConfigLoader;
+import java.util.logging.LogManager;
 import model.OutboundMessage;
 import model.RoomInfo;
 import model.RoomSearchQuery;
@@ -40,6 +41,7 @@ public class DecisionTreeBot {
     private DecisionTreeBot() {
         BasicConfigurator.configure();
         org.apache.log4j.Logger.getRootLogger().setLevel(Level.INFO);
+        LogManager.getLogManager().reset();
 
         try {
             config = SymConfigLoader.loadConfig("config.json", DecisionTreeBotConfig.class);
@@ -160,13 +162,17 @@ public class DecisionTreeBot {
         state.put(userId, options);
     }
 
+    public static String cleanMessage(String original) {
+        return original.replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll("<br>", "<br />")
+            .replaceAll("\n", "<br />");
+    }
+
     /* Symphony APIs */
 
     public static void sendMessage(String streamId, String message) {
-        String formattedMsg = message
-            .replaceAll("<br>", "<br />")
-            .replaceAll("\n", "<br />");
-        botClient.getMessagesClient().sendMessage(streamId, new OutboundMessage(formattedMsg));
+        botClient.getMessagesClient().sendMessage(streamId, new OutboundMessage(message));
     }
 
     public static void sendMessage(String streamId, String message, File[] attachments) {

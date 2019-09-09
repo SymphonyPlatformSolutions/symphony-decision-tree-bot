@@ -25,7 +25,7 @@ The bot can also forward custom enquiries to an admin room if one is provided in
 
 # Configuration
 Fill up `src/main/resources/config.json` with the appropriate values for pod information,
-service account details, data file location and the name of the compliance team room. 
+service account details, data file location and the name of the admin room. 
 ```json5
 {
     "sessionAuthHost": "[pod].symphony.com",
