@@ -1,6 +1,7 @@
 package com.symphony.platformsolutions.decisiontree.service;
 
 import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvException;
 import com.symphony.platformsolutions.decisiontree.DecisionTreeBot;
 import com.symphony.platformsolutions.decisiontree.entity.Scenario;
 import com.symphony.platformsolutions.decisiontree.entity.ScenarioDatabase;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 public class ScenarioService {
     private static final Logger LOG = LoggerFactory.getLogger(ScenarioService.class);
 
-    public static List<String[]> readCsv() throws IOException {
+    public static List<String[]> readCsv() throws IOException, CsvException {
         String path = DecisionTreeBot.getDataFilePath();
 
         if (!(new File(path)).exists()) {

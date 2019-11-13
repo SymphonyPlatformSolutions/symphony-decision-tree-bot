@@ -1,5 +1,6 @@
 package com.symphony.platformsolutions.decisiontree.listeners;
 
+import com.opencsv.exceptions.CsvException;
 import com.symphony.platformsolutions.decisiontree.DecisionTreeBot;
 import com.symphony.platformsolutions.decisiontree.service.ScenarioService;
 import listeners.RoomListener;
@@ -116,7 +117,7 @@ public class RoomListenerImpl implements RoomListener {
             try {
                 ScenarioService.saveDataFile(existingDataBytes);
                 DecisionTreeBot.reloadScenarioDb();
-            } catch (IOException e2) {
+            } catch (IOException | CsvException e2) {
                 LOG.error("", e2);
             }
         }

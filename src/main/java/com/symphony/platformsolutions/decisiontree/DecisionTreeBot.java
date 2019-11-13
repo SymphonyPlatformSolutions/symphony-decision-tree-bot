@@ -2,6 +2,7 @@ package com.symphony.platformsolutions.decisiontree;
 
 import authentication.SymBotRSAAuth;
 import clients.SymBotClient;
+import com.opencsv.exceptions.CsvException;
 import com.sun.net.httpserver.HttpServer;
 import com.symphony.platformsolutions.decisiontree.config.DecisionTreeBotConfig;
 import com.symphony.platformsolutions.decisiontree.entity.Scenario;
@@ -34,11 +35,11 @@ public class DecisionTreeBot {
     private static ScenarioDatabase scenarioDatabase;
     private static Map<Long, List<Scenario>> state = new HashMap<>();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         new DecisionTreeBot();
     }
 
-    private DecisionTreeBot() {
+    private DecisionTreeBot() throws Exception {
         BasicConfigurator.configure();
         org.apache.log4j.Logger.getRootLogger().setLevel(Level.INFO);
         LogManager.getLogManager().reset();
@@ -128,7 +129,7 @@ public class DecisionTreeBot {
 
     /* Scenario Database */
 
-    public static void reloadScenarioDb() throws IOException {
+    public static void reloadScenarioDb() throws IOException, CsvException {
         List<String[]> data = ScenarioService.readCsv();
         scenarioDatabase = ScenarioService.loadScenarioDatabase(data);
 
