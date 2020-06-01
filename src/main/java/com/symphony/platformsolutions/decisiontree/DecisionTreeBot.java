@@ -53,20 +53,12 @@ public class DecisionTreeBot {
             botClient = SymBotClient.initBot(config, botAuth);
             botClient.getDatafeedEventsService().addListeners(new RoomListenerImpl(), new IMListenerImpl());
 
-            if (config.getAdminRoomName() != null && !config.getAdminRoomName().isEmpty()) {
-                RoomSearchQuery query = new RoomSearchQuery();
-                query.setQuery(config.getAdminRoomName());
-                List<RoomInfo> rooms = botClient.getStreamsClient().searchRooms(query, 0, 1).getRooms();
-                if (rooms.isEmpty()) {
-                    throw new NoContentException("");
-                }
-                adminRoomId = rooms.get(0).getRoomSystemInfo().getId();
-                LOG.info("Admin Room = {} ({})", rooms.get(0).getRoomAttributes().getName(), adminRoomId);
+            if (config.getAdminRoomStreamId() != null && !config.getAdminRoomStreamId().isEmpty()) {
+                adminRoomId = config.getAdminRoomStreamId();
+                LOG.info("Admin Room = {}", adminRoomId);
             } else {
                 LOG.info("No admin room defined");
             }
-
-            botClient.getPresenceClient().setPresence("Available");
             LOG.info("Bot is ready");
 
             if (config.isHealthCheckEnabled()) {

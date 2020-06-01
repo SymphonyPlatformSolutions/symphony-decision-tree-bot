@@ -7,6 +7,7 @@ import configuration.SymConfig;
 public class DecisionTreeBotConfig extends SymConfig {
     private String dataFilePath;
     private String adminRoomName;
+    private String adminRoomStreamId;
     private boolean healthCheckEnabled;
     private boolean enquiryEnabled;
     private String welcomeMessage;
@@ -27,6 +28,14 @@ public class DecisionTreeBotConfig extends SymConfig {
 
     public void setAdminRoomName(String adminRoomName) {
         this.adminRoomName = adminRoomName;
+    }
+
+    public String getAdminRoomStreamId() {
+        return adminRoomStreamId;
+    }
+
+    public void setAdminRoomStreamId(String adminRoomStreamId) {
+        this.adminRoomStreamId = adminRoomStreamId;
     }
 
     public boolean isHealthCheckEnabled() {
