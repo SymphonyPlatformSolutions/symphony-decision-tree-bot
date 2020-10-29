@@ -11,10 +11,7 @@ import com.symphony.platformsolutions.decisiontree.listeners.IMListenerImpl;
 import com.symphony.platformsolutions.decisiontree.listeners.RoomListenerImpl;
 import com.symphony.platformsolutions.decisiontree.service.ScenarioService;
 import configuration.SymConfigLoader;
-import java.util.logging.LogManager;
 import model.OutboundMessage;
-import model.RoomInfo;
-import model.RoomSearchQuery;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
@@ -26,6 +23,7 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.LogManager;
 
 public class DecisionTreeBot {
     private static final Logger LOG = LoggerFactory.getLogger(DecisionTreeBot.class);
@@ -157,7 +155,7 @@ public class DecisionTreeBot {
 
     public static String cleanMessage(String original) {
         return original.replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
+            .replaceAll("<(?!/?a)", "&lt;")
             .replaceAll("<br>", "<br />")
             .replaceAll("\n", "<br />");
     }
