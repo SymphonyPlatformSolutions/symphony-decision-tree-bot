@@ -6,7 +6,7 @@
 
     <groupId>com.symphony.ps</groupId>
     <artifactId>decision-tree-bot</artifactId>
-    <version>1.6.0</version>
+    <version>1.6.1</version>
     <name>Symphony Decision Tree Bot</name>
     <url>https://github.com/SymphonyPlatformSolutions/symphony-decision-tree-bot</url>
     <description>Decision tree style FAQ bot</description>
@@ -83,12 +83,12 @@
         <dependency>
             <groupId>com.symphony.platformsolutions</groupId>
             <artifactId>symphony-api-client-java</artifactId>
-            <version>1.1.8</version>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
             <groupId>com.opencsv</groupId>
             <artifactId>opencsv</artifactId>
-            <version>5.0</version>
+            <version>5.3</version>
         </dependency>
     </dependencies>
 </project>
