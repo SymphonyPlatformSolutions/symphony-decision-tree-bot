@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -77,7 +76,12 @@ public class RoomListenerImpl implements RoomListener {
         File[] files = new File[] { ScenarioService.getDataFile() };
         String prefix = isAdHoc ? "Current" : "Previous";
         String suffix = isAdHoc ? "" : " for your reference";
-        DecisionTreeBot.sendMessage(streamId, prefix + " data file attached" + suffix, files);
+
+        try {
+            DecisionTreeBot.sendMessage(streamId, prefix + " data file attached" + suffix, files);
+        } catch (Exception e) {
+            DecisionTreeBot.sendMessage(streamId, "I was unable to process this request: " + e);
+        }
     }
 
     private void processUpload(String streamId, String messageId, List<Attachment> attachments) {
