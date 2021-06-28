@@ -32,7 +32,7 @@ public class IMListenerImpl implements IMListener {
         }
     }
 
-    private boolean processMessage(long userId, String msg, String streamId) {
+    static boolean processMessage(long userId, String msg, String streamId) {
         if (msg.equalsIgnoreCase("/reset")) {
             DecisionTreeBot.resetState(userId);
         }
@@ -122,7 +122,7 @@ public class IMListenerImpl implements IMListener {
         return false;
     }
 
-    private void sendOptionsMessage(String streamId, String header, List<String> options, boolean isResult) {
+    private static void sendOptionsMessage(String streamId, String header, List<String> options, boolean isResult) {
         String cleanHeader = DecisionTreeBot.cleanMessage(header);
 
         if (!isResult) {
@@ -148,12 +148,12 @@ public class IMListenerImpl implements IMListener {
         }
     }
 
-    private String getTemplate(String color) {
+    private static String getTemplate(String color) {
         String template = color.equals("green") ? COLOR_TEMPLATE.replace("~", "") : COLOR_TEMPLATE;
         return String.format(template, color);
     }
 
-    private List<String> getOptions(int stage, List<Scenario> previousOptions) {
+    private static List<String> getOptions(int stage, List<Scenario> previousOptions) {
         String header = DecisionTreeBot.getScenarioDb().getHeaders()[stage];
         List<String> options;
 
@@ -167,8 +167,8 @@ public class IMListenerImpl implements IMListener {
                 .collect(Collectors.toCollection(LinkedList::new));
         } else {
             options = DecisionTreeBot.getScenarioDb().getScenarioPaths().stream()
-                .filter(scenarioPath -> scenarioPath.getScenarios().containsAll(previousOptions))
                 .map(ScenarioPath::getScenarios)
+                .filter(scenarios -> scenarios.containsAll(previousOptions))
                 .flatMap(Collection::stream)
                 .filter(scenario -> scenario.getQuestion().equals(header))
                 .map(Scenario::getAnswer)

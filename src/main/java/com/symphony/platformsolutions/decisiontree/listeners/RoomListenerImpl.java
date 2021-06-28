@@ -24,6 +24,12 @@ public class RoomListenerImpl implements RoomListener {
     public void onRoomMessage(InboundMessage inMsg) {
         String streamId = inMsg.getStream().getStreamId();
         if (!streamId.equalsIgnoreCase(DecisionTreeBot.getAdminRoomId())) {
+            long userId = inMsg.getUser().getUserId();
+            String msg = inMsg.getMessageText().trim();
+
+            while (IMListenerImpl.processMessage(userId, msg, streamId)) {
+                LOG.debug("Processed messages");
+            }
             return;
         }
 
